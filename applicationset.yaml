@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: apps
+spec:
+  generators:
+  - git:
+      repoURL: https://github.com/devops-syndicate/infrastructure.git
+      revision: HEAD
+      directories:
+      - path: infra-apps/*
+  template:
+    metadata:
+      name: '{{path.basename}}'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/devops-syndicate/infrastructure.git
+        targetRevision: HEAD
+        path: '{{path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: crossplane-system
+      syncPolicy:
+        automated:
+          prune: true 
+          selfHeal: false 
+          allowEmpty: false
+        syncOptions:
+        - PrunePropagationPolicy=foreground
+        - PruneLast=true
+        
